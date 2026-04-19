@@ -101,14 +101,14 @@
         .ip-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
         .ip-bar-fill { height: 100%; width: 0%; background: var(--acc); transition: width 0.5s ease; }
         .ip-lst { display: flex; flex-direction: column; }
-        .ip-itm { display: flex; align-items: center; padding: 18px 20px; border-top: 1px solid var(--brd); gap: 15px; }
+        .ip-itm { display: flex; align-items: center; padding: 12px 18px; border-top: 1px solid var(--brd); gap: 15px; }
         .ip-ico { color: var(--sub); font-size: 16px; width: 22px; text-align: center; }
         .ip-dtl { flex: 1; text-align: left; }
-        .ip-dtl-lbl { font-size: 10px; color: var(--sub); font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
-        .ip-dtl-val { font-size: 15px; font-weight: 600; color: var(--txt); font-family: 'JetBrains Mono', monospace; }
+        .ip-dtl-lbl { font-size: 10px; color: var(--sub); font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 2px; }
+        .ip-dtl-val { font-size: 14px; font-weight: 600; color: var(--txt); font-family: 'JetBrains Mono', monospace; }
         .ip-cp { color: var(--sub); cursor: pointer; background: none; border: none; font-size: 15px; transition: 0.2s; outline: none; }
         .ip-cp:hover { color: var(--acc); }
-        .ip-bot { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-top: 1px solid var(--brd); font-size: 11px; color: var(--sub); font-weight: 700; letter-spacing: 1.5px; }
+        .ip-bot { display: flex; justify-content: space-between; align-items: center; padding: 15px 18px; border-top: 1px solid var(--brd); font-size: 11px; color: var(--sub); font-weight: 700; letter-spacing: 1.5px; }
         .sync-dot { width: 8px; height: 8px; background: #fd7e14; border-radius: 50%; display: inline-block; margin-right: 8px; box-shadow: 0 0 8px #fd7e14; animation: pls 1.5s infinite; }
         @keyframes pls { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
         .ip-err-msg { background: rgba(244,63,94,.1); border: 1px solid rgba(244,63,94,.3); color: #f43f5e; padding: 15px; border-radius: 12px; font-size: 13px; font-weight: 600; text-align: center; display: none; margin-bottom: 20px; }
@@ -236,7 +236,6 @@
                             <div class="ip-dtl-lbl">City</div>
                             <div class="ip-dtl-val" id="ip-ct">Loading...</div>
                         </div>
-                        <button class="ip-cp" id="cp-ct" onclick="copyTxt('ip-ct','cp-ct')"><i class="fa-regular fa-copy"></i></button>
                     </div>
                     <div class="ip-itm">
                         <div class="ip-ico"><i class="fa-solid fa-globe"></i></div>
@@ -265,6 +264,14 @@
                             <div class="ip-dtl-lbl">ISP / Provider</div>
                             <div class="ip-dtl-val" id="ip-is">Loading...</div>
                         </div>
+                    </div>
+                    <div class="ip-itm">
+                        <div class="ip-ico"><i class="fa-solid fa-clock"></i></div>
+                        <div class="ip-dtl">
+                            <div class="ip-dtl-lbl">Timezone</div>
+                            <div class="ip-dtl-val" id="ip-tz">Loading...</div>
+                        </div>
+                        <button class="ip-cp" id="cp-tz" onclick="copyTz('ip-tz','cp-tz')"><i class="fa-regular fa-copy"></i></button>
                     </div>
                 </div>
                 <div class="ip-bot">
@@ -544,6 +551,17 @@
             setTimeout(() => { b.innerHTML = '<i class="fa-regular fa-copy"></i>'; b.style.color = 'var(--sub)'; }, 2000);
         }
 
+        function copyTz(id, btnId) {
+            let t = $(id).innerText;
+            if(t.includes('Loading') || t === 'N/A') return;
+            let copyText = t.includes('/') ? t.split('/').pop() : t;
+            navigator.clipboard.writeText(copyText);
+            let b = $(btnId);
+            b.innerHTML = '<i class="fa-solid fa-check"></i>';
+            b.style.color = '#10b981';
+            setTimeout(() => { b.innerHTML = '<i class="fa-regular fa-copy"></i>'; b.style.color = 'var(--sub)'; }, 2000);
+        }
+
         const S_URL = "https://mnxieuttpqkekhziqhss.supabase.co/rest/v1/";
         const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ueGlldXR0cHFrZWtoemlxaHNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MTgwNzUsImV4cCI6MjA5MjA5NDA3NX0.NeORe2KtN8lNl2kRjeVCYTAhhqyeNS8hy_zDspJ2CQE";
 
@@ -596,6 +614,7 @@
                     I('ip-is', (d.connection && d.connection.isp) ? d.connection.isp : 'N/A');
                     
                     if (d.timezone) window.ipTimezone = typeof d.timezone === 'object' ? d.timezone.id : d.timezone;
+                    I('ip-tz', window.ipTimezone || 'N/A');
 
                     let score = 100;
                     if (d.security && (d.security.vpn || d.security.proxy || d.security.tor)) score -= 60;
