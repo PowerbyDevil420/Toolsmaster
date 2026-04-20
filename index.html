@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toolsmaster Pro - Official</title>
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet" crossorigin="anonymous">
+    <!-- OTP Auth -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/otpauth/9.1.4/otpauth.umd.min.js"></script>
+    <!-- Required library for HTML to PNG conversion -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    <style>
+        :root { --bg: #040711; --card: #0a101f; --acc: #007bff; --txt: #fff; --sub: #bcc2cd; --brd: #141a29; --shd: rgba(0, 123, 255, 0.08); }
+        body.green { --bg: #021206; --card: #05240d; --acc: #28a745; --shd: rgba(40, 167, 69, 0.1); }
+        body.orange { --bg: #120a02; --card: #241605; --acc: #fd7e14; --shd: rgba(253, 126, 20, 0.1); }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: var(--txt); font-family: 'Inter', sans-serif; transition: 0.4s ease; overflow-x: hidden; }
+        .wrap { max-width: 600px; margin: 0 auto; position: relative; }
+        
+        /* Header */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 25px 20px; }
+        .logo { font: 800 20px 'Inter'; background: linear-gradient(90deg, #f0f, #007bff, #0f0, #f0f) 0% 50%/300%; -webkit-background-clip: text; color: transparent; animation: mv 4s linear infinite; }
+        @keyframes mv { to { background-position: 100% 50%; } }
+        
+        .dots { display: flex; gap: 12px; }
+        .dot { width: 16px; height: 16px; border-radius: 50%; cursor: pointer; border: 2px solid #333; transition: 0.3s; }
+        .dot.active { border-color: #fff; transform: scale(1.3); }
+
+        /* General UI */
+        .hero { padding: 40px 20px; text-align: center; transition: 0.3s; }
+        .hero h2 { font: 300 16px/1.6 'Inter'; color: var(--sub); }
+        .hero span { color: var(--txt); font-weight: 800; text-decoration: underline var(--acc); text-underline-offset: 5px; }
+
+        /* Tools Grid (Home Screen) */
+        .grid { padding: 0 20px 50px; display: flex; flex-direction: column; gap: 15px; transition: 0.3s; }
+        .card { background: var(--card); border: 1px solid var(--brd); border-radius: 15px; padding: 22px; transition: 0.3s; box-shadow: 0 4px 15px var(--shd); cursor: pointer; }
+        .card:hover { border-color: var(--acc); transform: translateY(-5px); }
+        .icon { background: rgba(255,255,255,0.05); color: var(--acc); width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 14px; font-size: 24px; margin-bottom: 18px; }
+        .card h3 { margin-bottom: 10px; font-size: 19px; font-weight: 600; }
+        .card p { color: var(--sub); font-size: 13.5px; line-height: 1.5; }
+
+        /* Tools Pages Container (Hidden by default) */
+        .page { display: none; padding: 0 20px 50px; animation: fi 0.4s ease forwards; }
+        @keyframes fi { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .back-btn { font: 600 14px 'Inter'; color: var(--sub); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 25px; transition: 0.3s; }
+        .back-btn:hover { color: var(--acc); }
+
+        /* Inner Tool Box Styles (Shared) */
+        .box { background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 15px 35px var(--shd); border: 1px solid var(--brd); text-align: center; }
+        .act-btn { width: 100%; padding: 13px; border: none; border-radius: 30px; font: bold 16px 'Inter'; cursor: pointer; transition: .3s; background: var(--acc); color: var(--bg); margin-top: 10px; }
+        .act-btn:hover { opacity: 0.8; transform: translateY(-2px); }
+        .act-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Email Blender Toolkit Styles */
+        @keyframes r-blender { to { transform: rotate(360deg); } }
+        .lbl { display: block; font-size: 14px; font-weight: bold; margin-bottom: 8px; color: var(--acc); text-align: left; }
+        textarea.blend-area { width: 100%; height: 120px; background: var(--bg); color: var(--acc); border: 1px solid var(--brd); border-radius: 10px; padding: 12px; font-family: 'Courier New',monospace; font-size: 13px; resize: none; outline: none; margin-bottom: 15px; box-sizing: border-box; }
+        textarea.blend-area:focus { border-color: var(--acc); }
+
+        /* Email Generator Toolkit Styles */
+        .ig { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .il { font-size: 13px; font-weight: bold; color: var(--acc); width: 80px; text-align: left; }
+        .ib { flex: 1; background: var(--bg); color: var(--txt); border: 1px solid var(--brd); border-radius: 10px; padding: 10px; font-size: 14px; outline: none; }
+        .ib:focus { border-color: var(--acc); }
+        .out-box { background: var(--bg); border: 1px solid var(--brd); border-radius: 10px; padding: 15px; margin-top: 20px; text-align: left; }
+        .rt { color: var(--sub); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-family: 'JetBrains Mono', monospace; }
+        .live-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: p-green 2s infinite; }
+        .txt-area { width: 100%; background: transparent; border: none; color: #34d399; font-family: 'JetBrains Mono', monospace; font-size: 13px; resize: none; outline: none; line-height: 1.6; min-height: 150px; text-shadow: 0 0 10px rgba(52,211,153,.2); }
+        .txt-area::-webkit-scrollbar { width: 4px; }
+        .txt-area::-webkit-scrollbar-thumb { background: rgba(52,211,153,.5); border-radius: 10px; }
+        @keyframes p-green { 0% { box-shadow: 0 0 0 0 rgba(16,185,129,.7); } 70% { box-shadow: 0 0 0 6px rgba(16,185,129,0); } 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); } }
+
+        /* 2FA Toolkit Styles */
+        textarea.sk-area { width: 100%; height: 70px; background: var(--bg); color: var(--acc); border: 1px solid var(--brd); border-radius: 10px; padding: 10px; font-family: 'Courier New',monospace; font-size: 13px; resize: none; outline: none; box-sizing: border-box; margin-top: 8px; }
+        .otp { font-size: 45px; font-weight: bold; color: var(--acc); margin: 15px 0; letter-spacing: 4px; min-height: 55px; text-shadow: 0 0 10px var(--shd); }
+        @keyframes p { 0%,100%{ transform: scale(1); box-shadow: 0 4px 10px rgba(0,0,0,.3); } 50%{ transform: scale(1.05); box-shadow: 0 4px 18px rgba(0,0,0,.4); } }
+        @keyframes b { 0% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        /* Password Gen Toolkit Styles */
+        .tabs { display: flex; background: var(--bg); border-radius: 10px; padding: 5px; margin-bottom: 20px; }
+        .tab { flex: 1; padding: 8px; cursor: pointer; font: bold 13px 'Inter'; border-radius: 8px; transition: .3s; color: var(--sub); }
+        .tab.active { background: var(--acc); color: var(--bg); }
+        .res { background: var(--bg); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--brd); min-height: 50px; display: flex; justify-content: center; align-items: center; word-break: break-all; color: var(--acc); font: bold 18px 'Courier New',monospace; }
+        .set { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 14px; }
+        input[type=range] { width: 100%; accent-color: var(--acc); margin-bottom: 20px; }
+        input[type=checkbox] { accent-color: var(--acc); width: 18px; height: 18px; cursor: pointer; }
+        .cpy { background: #334155; color: #fff; }
+        .hid { display: none; }
+
+        /* IP Checker Specifics */
+        .ip-card { background: var(--card); border: 1px solid var(--brd); border-radius: 16px; margin-bottom: 20px; overflow: hidden; }
+        .ip-header { padding: 25px 20px 20px; position: relative; }
+        .ip-lbl { font-size: 11px; font-weight: 800; color: var(--sub); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px; text-align: left; }
+        .ip-score-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; }
+        .ip-score { font-size: 48px; font-weight: 800; color: var(--txt); line-height: 1; text-align: left; }
+        .ip-status-btn { background: rgba(253,126,20,0.1); border: 1px solid rgba(253,126,20,0.3); color: #fd7e14; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 800; letter-spacing: 1px; transition: 0.3s; }
+        .ip-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
+        .ip-bar-fill { height: 100%; width: 0%; background: var(--acc); transition: width 0.5s ease; }
+        .ip-lst { display: flex; flex-direction: column; }
+        .ip-itm { display: flex; align-items: center; padding: 12px 18px; border-top: 1px solid var(--brd); gap: 15px; }
+        .ip-ico { color: var(--sub); font-size: 16px; width: 22px; text-align: center; }
+        .ip-dtl { flex: 1; text-align: left; }
+        .ip-dtl-lbl { font-size: 10px; color: var(--sub); font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 2px; }
+        .ip-dtl-val { font-size: 14px; font-weight: 600; color: var(--txt); font-family: 'JetBrains Mono', monospace; }
+        .ip-cp { color: var(--sub); cursor: pointer; background: none; border: none; font-size: 15px; transition: 0.2s; outline: none; }
+        .ip-cp:hover { color: var(--acc); }
+        .ip-bot { display: flex; justify-content: space-between; align-items: center; padding: 15px 18px; border-top: 1px solid var(--brd); font-size: 11px; color: var(--sub); font-weight: 700; letter-spacing: 1.5px; }
+        .sync-dot { width: 8px; height: 8px; background: #fd7e14; border-radius: 50%; display: inline-block; margin-right: 8px; box-shadow: 0 0 8px #fd7e14; animation: pls 1.5s infinite; }
+        @keyframes pls { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        .ip-err-msg { background: rgba(244,63,94,.1); border: 1px solid rgba(244,63,94,.3); color: #f43f5e; padding: 15px; border-radius: 12px; font-size: 13px; font-weight: 600; text-align: center; display: none; margin-bottom: 20px; }
+
+        /* Report Checker Toolkit Styles */
+        .rc-grid { display: grid; gap: 15px; grid-template-columns: 1fr; margin-bottom: 20px; }
+        .rc-card { background: var(--bg); border: 1px solid var(--brd); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+        .rc-card-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--brd); background: rgba(0,0,0,.2); }
+        .rc-card-title { font-size: 14px; font-weight: 600; cursor: pointer; user-select: none; flex: 1; text-align: left; color: var(--txt); }
+        .rc-actions { display: flex; gap: 4px; align-items: center; }
+        .btn-icon { background: 0 0; border: none; color: var(--sub); cursor: pointer; padding: 6px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+        .btn-icon:hover { background: rgba(255,255,255,.1); color: var(--txt); }
+        .btn-icon.danger:hover { background: rgba(244,63,94,.1); color: #f43f5e; }
+        svg.ico { stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+        .editor-wrap { display: flex; height: 160px; background: rgba(0,0,0,.2); transition: max-height .2s, opacity .2s; max-height: 300px; opacity: 1; overflow: hidden; }
+        .editor-wrap.hidden { max-height: 0; opacity: 0; border: none; }
+        .ln-bar { width: 35px; flex-shrink: 0; background: rgba(0,0,0,.3); border-right: 1px solid var(--brd); color: #71717a; text-align: center; font-family: ui-monospace,monospace; font-size: 11px; line-height: 20px; padding: 10px 0; overflow: hidden; user-select: none; }
+        .editor-ta { flex: 1; background: 0 0; border: none; color: #e4e4e7; padding: 10px; font-family: ui-monospace,monospace; font-size: 11px; line-height: 20px; resize: none; outline: 0; white-space: pre; overflow: auto; width: 100%; box-sizing: border-box; }
+        .editor-ta::-webkit-scrollbar { width: 4px; height: 4px; }
+        .editor-ta::-webkit-scrollbar-thumb { background: var(--brd); border-radius: 4px; }
+        
+        .rc-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .rc-tab-btn { background: var(--bg); border: 1px solid var(--brd); border-radius: 10px; padding: 12px; text-align: center; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; user-select: none; color: var(--sub); }
+        .rc-tab-btn.good.active { background: rgba(16,185,129,.1); border-color: #10b981; color: #10b981; }
+        .rc-tab-btn.report.active { background: rgba(244,63,94,.1); border-color: #f43f5e; color: #f43f5e; }
+        
+        .results-section { display: none; flex-direction: column; margin-top: 25px; animation: fadeIn .4s ease forwards; }
+        .chart-view { display: none; flex-direction: column; margin-bottom: 20px; }
+        .chart-view.active { display: flex; }
+        
+        /* Invoice Styling (Scoped to Report Checker) */
+        .invoice-container { margin: 10px auto 0; width: 100%; max-width: 400px; }
+        .invoice-toolbar { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 12px; align-items: center; }
+        .toolbar-divider { width: 1px; height: 20px; background: var(--brd); margin: 0 4px; }
+        .invoice-card-wrapper { background: #000; border: 1px solid #222; border-radius: 20px; padding: 25px; box-shadow: 0 15px 30px rgba(0,0,0,.5); }
+        .inv-title { text-align: center; font-size: 20px; font-weight: 700; letter-spacing: 2px; color: #fff; margin-bottom: 20px; }
+        .inv-grid { display: grid; grid-template-columns: 1fr 1fr; row-gap: 15px; column-gap: 10px; font-size: 14px; font-weight: 500; }
+        .inv-item { display: flex; align-items: center; white-space: nowrap; }
+        .inv-label { color: #a1a1aa; min-width: 60px; display: inline-block; text-align: left; }
+        .inv-val { color: #fff; font-weight: 700; display: flex; align-items: center; }
+        .text-good { color: #00ff66; } .text-rep { color: #ff3333; } .text-bal { color: #6688ff; }
+        .inv-divider { border-top: 1px dashed #333; margin: 15px 0; }
+        .inv-footer { display: flex; justify-content: center; align-items: center; font-size: 16px; font-weight: 700; }
+        .edit-input { background: 0 0; border: none; border-bottom: 1px solid #52525b; color: #fff; font: inherit; outline: 0; text-align: center; width: 50px; margin-left: 4px; }
+        .edit-input:focus { border-color: var(--acc); }
+        .name-inp { width: 100px; margin-left: 0; }
+        .hidden-el { display: none !important; }
+
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.9); z-index: 99; flex-direction: column; align-items: center; justify-content: center; padding: 20px; animation: fadeIn .2s ease forwards; }
+
+        /* Footer */
+        .footer { border-top: 1px solid var(--brd); padding: 40px 20px; text-align: center; transition: 0.3s; }
+        .notice { background: rgba(255,68,68,0.05); border: 1px solid rgba(255,68,68,0.4); padding: 18px; border-radius: 12px; color: #fcc; font-size: 13px; line-height: 1.5; margin: 25px 0; }
+        .btns { display: flex; gap: 12px; }
+        .social-btn { flex: 1; padding: 12px; border-radius: 10px; text-decoration: none; color: #fff; font: 600 14px 'Inter'; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    </style>
+</head>
+<body>
+    <svg style="display:none"><defs>
+        <symbol id="i-nav" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></symbol>
+        <symbol id="i-clr" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></symbol>
+        <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></symbol>
+        <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></symbol>
+        <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+        <symbol id="i-cls" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+        <symbol id="i-edit" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></symbol>
+        <symbol id="i-shr" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></symbol>
+        <symbol id="i-dl" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></symbol>
+        <symbol id="i-chk" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+    </defs></svg>
+    <div class="wrap">
+        <header>
+            <div class="logo">TOOLSMASTER PRO</div>
+            <div class="dots">
+                <div class="dot active" style="background:#007bff" onclick="setTheme('')"></div>
+                <div class="dot" style="background:#28a745" onclick="setTheme('green')"></div>
+                <div class="dot" style="background:#fd7e14" onclick="setTheme('orange')"></div>
+            </div>
+        </header>
+
+        <!-- Home Screen -->
+        <div id="home-view">
+            <div class="hero">
+                <h2>A premium suite of robust utility tools.<br>Fast, secure, and <span>ready to use</span>.</h2>
+            </div>
+            <div class="grid" id="tools"></div>
+        </div>
+
+        <!-- IP Checker Tool Page View -->
+        <div id="page-ip" class="page">
+            <div class="back-btn" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i> Back to Tools</div>
+            <div class="ip-card">
+                <div class="ip-header">
+                    <div style="display:flex;justify-content:space-between;width:100%;align-items:center;margin-bottom:10px;">
+                        <div id="ip-used-st" style="font-weight:800;font-size:14px;letter-spacing:1px;text-transform:uppercase;"></div>
+                        <button class="ip-cp" style="color:var(--acc);font-weight:600;font-size:12px;cursor:pointer;background:rgba(255,255,255,0.05);padding:4px 10px;border-radius:6px;border:none;display:flex;align-items:center;gap:5px;" onclick="analyzeIP()"><i class="fa-solid fa-rotate-right"></i> Reload</button>
+                    </div>
+                    <div class="ip-lbl">Anonymity Score</div>
+                    <div class="ip-score-row">
+                        <div class="ip-score" id="ip-sc">0%</div>
+                        <div class="ip-status-btn" id="ip-btn">ANALYZING</div>
+                    </div>
+                    <div class="ip-bar-bg"><div class="ip-bar-fill" id="ip-prog"></div></div>
+                </div>
+                
+                <div class="ip-lst">
+                    <div class="ip-itm">
+                        <div class="ip-ico"><i class="fa-solid fa-wifi"></i></div>
+                        <div class="ip-dtl">
+                            <div class="ip-dtl-lbl">IP Address</div>
+                            <div class="ip-dtl-val" id="ip-ad">Loading...</div>
+                        </div>
+                    </div>
+                    <div class="ip-itm">
+                        <div class="ip-ico"><i class="fa-solid fa-shield-halved"></i></div>
+                        <div class="ip-dtl">
+                            <div class="ip-dtl-lbl">ASN</div>
+                            <div class="ip-dtl-val" id="ip-as">Loading...</div>
+                        </div>
+                        <button class="ip-cp" id="cp-as" onclick="copyTxt('ip-as','cp-as')"><i class="fa-regular fa-copy"></i></button>
+                    </div>
+                    <div class="ip-itm">
+                        <div class="ip-ico"><i class="fa-solid fa-location-dot"></i></div>
+                        <div class="ip-dtl">
+                            <div class="ip-dtl-lbl">City</div>
+                            <div class="ip-dtl-val" id="ip-ct">Loading...</div>
+                        </div>
+                    </div>
+                    <div class="ip-itm">
+                        <div class="ip-ico"><i class="fa-solid fa-globe"></i></div>
+                        <div class="ip-dtl">
+                            <div class="ip-dtl-lbl">Country</div>
+                            <div class="ip-dtl-val" id="ip-cn">Loading...</div>
+                        </div>
+                    </div>
+                    <div class="ip-itm">
+                        <div class="ip-ico"><i class="fa-solid fa-map"></i></div>
+                        <div class="ip-dtl">
+                            <div class="ip-dtl-lbl">Region</div>
+                            <div class="ip-dtl-val" id="ip-rg">Loading...</div>
+                        </div>
+                    </div>
+                    <div class="ip-itm">
+                        <div class="ip-ico"><i class="fa-solid fa-desktop"></i></div>
+                        <div class="ip-dtl">
+                            <div class="ip-dtl-lbl">Operating System</div>
+                            <div class="ip-dtl-val" id="ip-os">Loading...</div>
+                        </div>
+                    </div>
+                    <div class="ip-itm">
+                        <div class="ip-ico"><i class="fa-solid fa-server"></i></div>
+                        <div class="ip-dtl">
+                            <div class="ip-dtl-lbl">ISP / Provider</div>
+                            <div class="ip-dtl-val" id="ip-is">Loading...</div>
+                        </div>
+                    </div>
+                    <div class="ip-itm">
+                        <div class="ip-ico"><i class="fa-solid fa-clock"></i></div>
+                        <div class="ip-dtl">
+                            <div class="ip-dtl-lbl">Timezone</div>
+                            <div class="ip-dtl-val" id="ip-tz">Loading...</div>
+                        </div>
+                        <button class="ip-cp" id="cp-tz" onclick="copyTz('ip-tz','cp-tz')"><i class="fa-regular fa-copy"></i></button>
+                    </div>
+                </div>
+                <div class="ip-bot">
+                    <div id="ip-sync-lbl"><span class="sync-dot"></span> SYNCING...</div>
+                    <div id="ip-time">--:--:--</div>
+                </div>
+            </div>
+            <div class="ip-err-msg" id="ip-err-b">All servers failed. Check your connection.</div>
+        </div>
+
+        <!-- Report Checker Tool Page View -->
+        <div id="page-rc" class="page">
+            <div class="back-btn" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i> Back to Tools</div>
+            <div class="box" style="padding: 15px; border: none; background: transparent; box-shadow: none;">
+                <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:20px;">
+                    <div style="width:35px;height:35px;background:var(--acc);border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.3);display:flex;justify-content:center;align-items:center;font-size:18px;color:var(--bg);"><i class="fa-solid fa-file-circle-question"></i></div>
+                    <div style="text-align:left;">
+                        <div style="font-size:20px;font-weight:bold;line-height:1;color:var(--txt)">Report Checker</div>
+                        <div style="font-size:11px;color:var(--sub);letter-spacing:.5px;margin-top:3px">Powered by devil</div>
+                    </div>
+                </div>
+
+                <div class="rc-grid">
+                    <div class="rc-card">
+                        <div class="rc-card-header"><h2 class="rc-card-title" onclick="toggleEdit('mBox','iMain')">Enter main file</h2>
+                            <div class="rc-actions">
+                                <button class="btn-icon danger" onclick="clr('mInp','mLn')"><svg class="ico" width="16" height="16"><use href="#i-clr"/></svg></button>
+                                <button id="iMain" class="btn-icon" onclick="toggleEdit('mBox',this.id)"><svg class="ico" width="16" height="16"><use href="#i-eye-off"/></svg></button>
+                            </div>
+                        </div>
+                        <div id="mBox" class="editor-wrap"><div class="ln-bar" id="mLn"><div style="height:20px">1.</div></div><textarea class="editor-ta" id="mInp" spellcheck="false" placeholder="Main emails..." oninput="upLn('mInp','mLn')" onscroll="$('mLn').scrollTop=this.scrollTop"></textarea></div>
+                    </div>
+                    <div class="rc-card">
+                        <div class="rc-card-header"><h2 class="rc-card-title" onclick="toggleEdit('rBox','iRep')">Enter report file</h2>
+                            <div class="rc-actions">
+                                <button class="btn-icon danger" onclick="clr('rInp','rLn')"><svg class="ico" width="16" height="16"><use href="#i-clr"/></svg></button>
+                                <button id="iRep" class="btn-icon" onclick="toggleEdit('rBox',this.id)"><svg class="ico" width="16" height="16"><use href="#i-eye-off"/></svg></button>
+                            </div>
+                        </div>
+                        <div id="rBox" class="editor-wrap"><div class="ln-bar" id="rLn"><div style="height:20px">1.</div></div><textarea class="editor-ta" id="rInp" spellcheck="false" placeholder="Report emails..." oninput="upLn('rInp','rLn')" onscroll="$('rLn').scrollTop=this.scrollTop"></textarea></div>
+                    </div>
+                    <div class="rc-card">
+                        <div class="rc-card-header"><h2 class="rc-card-title">Enter Your Emails</h2>
+                            <div class="rc-actions"><button class="btn-icon danger" onclick="clr('tInp','tLn')"><svg class="ico" width="16" height="16"><use href="#i-clr"/></svg></button></div>
+                        </div>
+                        <div id="tBox" class="editor-wrap"><div class="ln-bar" id="tLn"><div style="height:20px">1.</div></div><textarea class="editor-ta" id="tInp" spellcheck="false" placeholder="Target emails..." oninput="upLn('tInp','tLn')" onscroll="$('tLn').scrollTop=this.scrollTop"></textarea></div>
+                    </div>
+                </div>
+
+                <button class="act-btn" onclick="exec()">Check Now</button>
+
+                <div class="results-section" id="resSec">
+                    <div class="rc-tabs">
+                        <div class="rc-tab-btn good" id="rc-tg" onclick="tab('g')">Good (0)</div>
+                        <div class="rc-tab-btn report" id="rc-tr" onclick="tab('r')">Report (0)</div>
+                    </div>
+
+                    <div class="rc-card chart-view" id="chart">
+                        <div class="rc-card-header" style="background:rgba(0,0,0,.3)"><h2 class="rc-card-title" id="cTitle">List</h2>
+                            <div class="rc-actions" style="border-left:1px solid var(--brd);padding-left:12px;margin-left:8px">
+                                <button class="btn-icon" onclick="copyRc()" id="btnC" style="font-size:12px;gap:4px;font-weight:600;"><svg class="ico" width="14" height="14"><use id="svgC" href="#i-copy"/></svg><span id="txtC">Copy</span></button>
+                                <button class="btn-icon danger" onclick="closeT()"><svg class="ico" width="16" height="16"><use href="#i-cls"/></svg></button>
+                            </div>
+                        </div>
+                        <div class="editor-wrap" style="height:200px;max-height:200px"><div class="ln-bar" id="cLn"><div style="height:20px">1.</div></div><textarea class="editor-ta" id="cInp" readonly onscroll="$('cLn').scrollTop=this.scrollTop"></textarea></div>
+                    </div>
+
+                    <div class="invoice-container">
+                        <div class="invoice-toolbar">
+                            <button class="btn-icon" onclick="togSum()" title="Edit"><svg class="ico" width="16" height="16"><use href="#i-edit"/></svg></button>
+                            <div class="toolbar-divider"></div>
+                            <button class="btn-icon" onclick="dl(3)" title="Share"><svg class="ico" width="16" height="16"><use href="#i-shr"/></svg></button>
+                            <button id="bCi" class="btn-icon" onclick="dl(2)" title="Copy Image"><svg class="ico" width="16" height="16"><use id="sCi" href="#i-copy"/></svg></button>
+                            <button class="btn-icon" onclick="dl(1)" title="Download"><svg class="ico" width="16" height="16"><use href="#i-dl"/></svg></button>
+                        </div>
+                        <div class="invoice-card-wrapper" id="invMap">
+                            <div class="inv-title">TOOLMASTER PRO</div>
+                            <div class="inv-grid">
+                                <div class="inv-item"><span class="inv-label">Good</span><span class="inv-val text-good">:&nbsp;<span id="sG">0</span></span></div>
+                                <div class="inv-item"><span class="inv-label">Price</span><span class="inv-val">:&nbsp;<span id="sPt">0</span><input type="number" id="sPb" class="edit-input hidden-el" value="0" oninput="calcSum()"></span></div>
+                                <div class="inv-item"><span class="inv-label">Report</span><span class="inv-val text-rep">:&nbsp;<span id="sR">0</span></span></div>
+                                <div class="inv-item"><span class="inv-label">Balance</span><span class="inv-val text-bal">:&nbsp;<span id="sB">0</span></span></div>
+                            </div>
+                            <div class="inv-divider"></div>
+                            <div class="inv-footer">
+                                <span class="inv-label" style="width:auto;margin-right:15px">Name :</span><span class="inv-val" style="letter-spacing:1px"><span id="sNt">.......</span><input type="text" id="sNb" class="edit-input name-inp hidden-el" placeholder="Name" oninput="calcSum()"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Output For Acode Webviews -->
+        <div id="imgModal" class="modal-overlay">
+            <p style="color:#a1a1aa;margin-bottom:15px;font-size:14px;text-align:center">Long-press the image to Share, Copy, or Save</p>
+            <img id="resImg" style="border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,1);max-width:90%;max-height:65vh;" />
+            <button class="act-btn" style="margin-top:20px;max-width:200px;" onclick="$('imgModal').style.display='none'">Close Image</button>
+        </div>
+
+        <!-- Email Blender Tool Page View -->
+        <div id="page-eb" class="page">
+            <div class="back-btn" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i> Back to Tools</div>
+            <div class="box">
+                <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:20px;">
+                    <div style="font-size:35px;animation:r-blender 3s linear infinite;">🌀</div>
+                    <div style="text-align:left;">
+                        <div style="font-size:22px;font-weight:bold;line-height:1;color:var(--txt)">Blender</div>
+                        <div style="font-size:11px;color:var(--sub);letter-spacing:.5px;margin-top:3px">Powered by Devil</div>
+                    </div>
+                </div>
+
+                <div style="position:relative;text-align:left;">
+                    <label class="lbl">Input-email</label>
+                    <span style="position:absolute;right:0;top:-2px;color:#fb7185;font-size:11px;cursor:pointer;font-weight:bold" onclick="$('eb-in').value=''; $('eb-out').value=''; $('eb-in').focus();">Clear-data</span>
+                </div>
+                <textarea id="eb-in" class="blend-area" placeholder="Paste emails & passwords here..."></textarea>
+
+                <button class="act-btn" style="margin-bottom:15px;" onclick="BlendEmails()">Blend</button>
+
+                <label class="lbl">Output-email</label>
+                <textarea id="eb-out" class="blend-area" readonly placeholder="Mixed result..."></textarea>
+
+                <button class="act-btn" id="cb-eb" onclick="CopyBlended()">Copy</button>
+
+                <div style="font-size:11px;color:var(--sub);margin-top:15px">Devil's Private Mixer v1.8</div>
+            </div>
+        </div>
+
+        <!-- Email Generator Tool Page View -->
+        <div id="page-eg" class="page">
+            <div class="back-btn" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i> Back to Tools</div>
+            <div class="box">
+                <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:25px;">
+                    <div style="width:35px;height:35px;background:var(--acc);border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.3);display:flex;justify-content:center;align-items:center;font-size:20px;color:var(--bg);"><i class="fa-solid fa-envelope"></i></div>
+                    <div style="text-align:left;">
+                        <div style="font-size:22px;font-weight:bold;line-height:1;color:var(--txt)">Email Generator</div>
+                        <div style="font-size:11px;color:var(--sub);letter-spacing:.5px;margin-top:3px">Powered by devil</div>
+                    </div>
+                </div>
+                
+                <div class="ig">
+                    <label class="il">Word count</label>
+                    <input id="eg-w" type="number" min="1" class="ib" placeholder="10">
+                </div>
+                <div class="ig">
+                    <label class="il">Total emails</label>
+                    <input id="eg-e" type="number" min="1" class="ib" placeholder="5">
+                </div>
+                
+                <button class="act-btn" onclick="G_mail()">Generate</button>
+
+                <div class="out-box">
+                    <div class="rt"><span class="live-dot"></span> Output Box</div>
+                    <textarea id="eg-o" readonly class="txt-area" placeholder="Emails will appear here..."></textarea>
+                </div>
+                
+                <button class="act-btn cpy" id="cb-eg" onclick="C_mail()" disabled style="margin-top:15px;background:#334155;">Copy Emails</button>
+            </div>
+        </div>
+
+        <!-- Password Generator Tool Page View -->
+        <div id="page-pg" class="page">
+            <div class="back-btn" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i> Back to Tools</div>
+            <div class="box">
+                <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:20px;">
+                    <div style="width:35px;height:35px;background:linear-gradient(135deg,#ef4444,#4f46e5);border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.3);display:flex;justify-content:center;align-items:center;font-size:20px;animation:p 3s infinite ease-in-out;">🔐</div>
+                    <div style="text-align:left;">
+                        <div style="font-size:22px;font-weight:bold;line-height:1;color:var(--txt)">Password-Generator</div>
+                        <div style="font-size:11px;color:var(--sub);letter-spacing:.5px;margin-top:3px">Powered by devil</div>
+                    </div>
+                </div>
+                
+                <div class="tabs">
+                    <div class="tab active" id="tr" onclick="S('random')">Random-pass</div>
+                    <div class="tab" id="ti" onclick="S('ios')">ios-pass</div>
+                </div>
+                <div class="res" id="out">Click Generate</div>
+                
+                <div id="or">
+                    <div style="text-align:left;font-size:13px;font-weight:bold;margin-bottom:12px;color:var(--acc)">Password Length: <span id="len">12</span></div>
+                    <input type="range" id="sl" min="6" max="32" value="12" oninput="document.getElementById('len').innerText=this.value">
+                    <div class="set"><span>Include Uppercase</span><input type="checkbox" id="up" checked></div>
+                    <div class="set"><span>Include Numbers</span><input type="checkbox" id="num" checked></div>
+                    <div class="set"><span>Include Symbols</span><input type="checkbox" id="sym" checked></div>
+                </div>
+                
+                <div id="oi" class="hid">
+                    <p style="font-size:12px;color:var(--sub);margin-bottom:15px">iOS-Style: 1 Upper, 1 Number, rest small chars.</p>
+                </div>
+                
+                <button class="act-btn" onclick="G()">Generate</button>
+                <button class="act-btn cpy" id="cb-pg" onclick="C()">Copy</button>
+            </div>
+        </div>
+
+        <!-- 2FA Tool Page View -->
+        <div id="page-2fa" class="page">
+            <div class="back-btn" onclick="goHome()"><i class="fa-solid fa-arrow-left"></i> Back to Tools</div>
+            <div class="box">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;justify-content:center;">
+                    <div style="width:32px;height:32px;background:linear-gradient(135deg, #ef4444, #4f46e5);border-radius:6px;position:relative;box-shadow:0 4px 10px rgba(0,0,0,.3);animation:p 3s infinite ease-in-out;">
+                        <div style="position:absolute;background:#fff;border-radius:10px;animation:b 1.5s infinite alternate ease-in-out;width:16px;height:3px;top:8px;left:8px;animation-delay:.1s"></div>
+                        <div style="position:absolute;background:#fff;border-radius:10px;animation:b 1.5s infinite alternate ease-in-out;width:10px;height:3px;top:14px;left:8px;animation-delay:.3s"></div>
+                        <div style="position:absolute;background:#fff;border-radius:10px;animation:b 1.5s infinite alternate ease-in-out;width:4px;height:4px;top:20px;left:8px;border-radius:50%;animation-delay:.5s"></div>
+                    </div>
+                    <div style="text-align:left;">
+                        <div style="font-size:22px;font-weight:bold;line-height:1;color:var(--txt)">2-Fa</div>
+                        <div style="font-size:11px;color:var(--sub);letter-spacing:0.5px;margin-top:3px">Powered by devil</div>
+                    </div>
+                </div>
+
+                <div style="position:relative;text-align:left;margin-bottom:15px">
+                    <label style="font-size:13px;font-weight:bold;color:var(--acc)">Enter your 2-fa link</label>
+                    <span style="position:absolute;right:0;top:-3px;color:#fb7185;font-size:11px;cursor:pointer;font-weight:bold" onclick="cl()">Clear-link</span>
+                    <textarea id="sk" class="sk-area" placeholder="Paste Secret Key Here" oninput="g2fa()"></textarea>
+                </div>
+                
+                <div class="otp" id="res2fa">000000</div>
+                <button class="act-btn" id="cb-2fa" onclick="cp2fa()">Copy OTP</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="logo" style="font-size: 18px;">TOOLSMASTER PRO</div>
+            <div class="notice">We are going private soon. This website will only remain public for a limited time. Don't lose out—stay connected with the Admin to maintain your service access.</div>
+            <div class="btns">
+                <a href="https://www.facebook.com/share/1CHkVCn7Qb/" target="_blank" class="social-btn" style="background: #1877f2;"><i class="fab fa-facebook"></i> Facebook</a>
+                <a href="https://wa.me/8801922755197" target="_blank" class="social-btn" style="background: #25d366;"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const $ = i => document.getElementById(i);
+
+        const tools = [
+            { id: "page-ip", i: "location-dot", title: "IP Checker", desc: "Detect and analyze IP addresses, geolocation, ASN, and network proxy details in real-time." },
+            { id: "page-rc", i: "file-circle-question", title: "Report Checker", desc: "Validate, view, and analyze complex reports and datasets instantly." },
+            { id: "page-eb", i: "shuffle", title: "Email Blender", desc: "Filter, combine, and sanitize large lists of email addresses efficiently." },
+            { id: "page-eg", i: "envelope", title: "Email Generator", desc: "Generate temporary disposable email addresses to prevent inbox spam." },
+            { id: "page-pg", i: "key", title: "Password Generator", desc: "Create highly secure, randomized passwords with custom character constraints." },
+            { id: "page-2fa", i: "user-shield", title: "2-Fa Key", desc: "Generate time-based one-time passwords (TOTP) from your secret keys." }
+        ];
+
+        // টুলস কার্ড জেনারেট করানো (ক্লিক করলে Tool পেইজ ওপেন হবে)
+        $('tools').innerHTML = tools.map(t => 
+            `<div class="card" ${t.id.startsWith('page-') ? `onclick="openTool('${t.id}')"` : ''}>
+                <div class="icon"><i class="fa-solid fa-${t.i}"></i></div>
+                <h3>${t.title}</h3>
+                <p>${t.desc}</p>
+            </div>`
+        ).join('');
+
+        // Navigation Logic
+        function openTool(pageId) {
+            $('home-view').style.display = 'none'; 
+            if(pageId.startsWith('page-')) { $(pageId).style.display = 'block'; }
+            window.scrollTo(0, 0); 
+            if(pageId === 'page-ip' && !window.ipParsed) analyzeIP();
+        }
+
+        function goHome() {
+            document.querySelectorAll('.page').forEach(p => p.style.display = 'none'); 
+            $('home-view').style.display = 'block'; 
+            window.scrollTo(0, 0);
+        }
+
+        // --- IP Checker Logic ---
+        function copyTxt(id, btnId) {
+            let t = $(id).innerText;
+            if(t.includes('Loading') || t === 'N/A') return;
+            navigator.clipboard.writeText(t);
+            let b = $(btnId);
+            b.innerHTML = '<i class="fa-solid fa-check"></i>';
+            b.style.color = '#10b981';
+            setTimeout(() => { b.innerHTML = '<i class="fa-regular fa-copy"></i>'; b.style.color = 'var(--sub)'; }, 2000);
+        }
+
+        function copyTz(id, btnId) {
+            let t = $(id).innerText;
+            if(t.includes('Loading') || t === 'N/A') return;
+            let copyText = t.includes('/') ? t.split('/').pop() : t;
+            navigator.clipboard.writeText(copyText);
+            let b = $(btnId);
+            b.innerHTML = '<i class="fa-solid fa-check"></i>';
+            b.style.color = '#10b981';
+            setTimeout(() => { b.innerHTML = '<i class="fa-regular fa-copy"></i>'; b.style.color = 'var(--sub)'; }, 2000);
+        }
+
+        const S_URL = "https://mnxieuttpqkekhziqhss.supabase.co/rest/v1/";
+        const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ueGlldXR0cHFrZWtoemlxaHNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1MTgwNzUsImV4cCI6MjA5MjA5NDA3NX0.NeORe2KtN8lNl2kRjeVCYTAhhqyeNS8hy_zDspJ2CQE";
+
+        function timeAgo(ds) {
+            let diff = Math.floor((new Date() - new Date(ds)) / 1000);
+            if(diff < 60) return `${diff}s ago`;
+            if(diff < 3600) return `${Math.floor(diff/60)}m ago`;
+            let hrs = Math.floor(diff / 3600);
+            if(hrs < 24) return `${hrs}h ago`;
+            return `${Math.floor(hrs/24)}d ${hrs%24}h ago`;
+        }
+
+        async function analyzeIP() {
+            window.ipParsed = true;
+            let I = (id,v) => $(id).innerText = v;
+            $('ip-err-b').style.display = 'none';
+            $('ip-prog').style.width = '20%';
+            $('ip-used-st').innerText = '';
+            
+            // Get OS Context
+            let ua = navigator.userAgent, os = "Unknown OS";
+            if(/windows nt/i.test(ua)) os = "Windows";
+            else if(/mac os x/i.test(ua)) os = "macOS";
+            else if(/android/i.test(ua)) os = "Android";
+            else if(/iphone|ipad|ipod/i.test(ua)) os = "iOS";
+            else if(/linux/i.test(ua)) os = "Linux";
+            I('ip-os', os);
+
+            try {
+                let d = null;
+                try {
+                    let r = await fetch('https://ipwho.is/');
+                    d = await r.json();
+                    if(!d.success) throw 1;
+                } catch(e) {
+                    let r = await fetch('https://ipinfo.io/json');
+                    d = await r.json();
+                    d.success = true;
+                    d.connection = { asn: d.org ? d.org.split(' ')[0] : 'N/A', isp: d.org ? d.org.substring(d.org.indexOf(' ')+1) : 'N/A' };
+                }
+                
+                $('ip-prog').style.width = '60%';
+                
+                setTimeout(() => {
+                    I('ip-ad', d.ip || 'N/A');
+                    I('ip-as', (d.connection && d.connection.asn) ? d.connection.asn : 'N/A');
+                    I('ip-ct', d.city || 'N/A');
+                    I('ip-cn', d.country || 'N/A');
+                    I('ip-rg', d.region || 'N/A');
+                    I('ip-is', (d.connection && d.connection.isp) ? d.connection.isp : 'N/A');
+                    
+                    if (d.timezone) window.ipTimezone = typeof d.timezone === 'object' ? d.timezone.id : d.timezone;
+                    
+                    let displayTz = window.ipTimezone || 'N/A';
+                    if (displayTz !== 'N/A') {
+                        displayTz = displayTz.split('/').pop().replace(/_/g, ' ');
+                    }
+                    I('ip-tz', displayTz);
+
+                    let score = 100;
+                    if (d.security && (d.security.vpn || d.security.proxy || d.security.tor)) score -= 60;
+                    
+                    I('ip-sc', score + '%');
+                    $('ip-prog').style.width = '100%';
+                    $('ip-btn').innerText = score >= 80 ? 'SECURE' : 'EXPOSED';
+                    $('ip-btn').style.color = score >= 80 ? '#10b981' : '#f43f5e';
+                    $('ip-btn').style.borderColor = score >= 80 ? '#10b981' : '#f43f5e';
+                    $('ip-btn').style.background = score >= 80 ? 'rgba(16,185,129,0.1)' : 'rgba(244,63,94,0.1)';
+                    
+                    $('ip-sync-lbl').innerHTML = '<span class="sync-dot" style="background:#10b981;box-shadow:0 0 8px #10b981"></span> SYNCED';
+
+                    // Supabase Used/Unused Logic
+                    let ip = d.ip || 'Unknown';
+                    if(ip !== 'Unknown') {
+                        fetch(S_URL + 'ip_logs?ip=eq.' + ip + '&select=*', {
+                            headers: { apikey: S_KEY, Authorization: "Bearer " + S_KEY }
+                        }).then(r => r.json()).then(res => {
+                            if(res.length > 0 && !res.message) {
+                                let lastChecked = new Date(res[0].checked_at || res[0].created_at || new Date());
+                                let diffDays = (new Date() - lastChecked) / (1000 * 60 * 60 * 24);
+                                
+                                if (diffDays >= 90) {
+                                    $('ip-used-st').innerText = 'UNUSED';
+                                    $('ip-used-st').style.color = '#10b981';
+                                    fetch(S_URL + 'ip_logs?ip=eq.' + ip, {
+                                        method: 'PATCH',
+                                        headers: { apikey: S_KEY, Authorization: "Bearer " + S_KEY, "Content-Type": "application/json" },
+                                        body: JSON.stringify({ checked_at: new Date().toISOString() })
+                                    }).catch(()=>{});
+                                } else {
+                                    $('ip-used-st').innerText = `USED ${timeAgo(lastChecked)}`;
+                                    $('ip-used-st').style.color = '#f43f5e';
+                                }
+                            } else if (!res.message) {
+                                $('ip-used-st').innerText = 'UNUSED';
+                                $('ip-used-st').style.color = '#10b981';
+                                fetch(S_URL + 'ip_logs', {
+                                    method: 'POST',
+                                    headers: { apikey: S_KEY, Authorization: "Bearer " + S_KEY, "Content-Type": "application/json" },
+                                    body: JSON.stringify({ ip: ip, checked_at: new Date().toISOString() })
+                                }).catch(()=>{});
+                            } else {
+                                console.log("Supabase logic failed: " + res.message);
+                            }
+                        }).catch(() => {});
+                    }
+                }, 600);
+
+            } catch(e) {
+                $('ip-err-b').style.display = 'block';
+                $('ip-prog').style.width = '100%';
+                $('ip-prog').style.background = '#f43f5e';
+                $('ip-btn').innerText = 'FAILED';
+                $('ip-sync-lbl').innerHTML = '<span class="sync-dot" style="background:#f43f5e;box-shadow:0 0 8px #f43f5e"></span> OFFLINE';
+            }
+        }
+
+        window.ipTimezone = null;
+        setInterval(() => {
+            let p = document.getElementById('page-ip');
+            if(p && p.style.display === 'block') {
+                try {
+                    let opt = { hour12: false };
+                    if(window.ipTimezone) opt.timeZone = window.ipTimezone;
+                    $('ip-time').innerText = new Date().toLocaleTimeString('en-US', opt);
+                } catch(e) {
+                    $('ip-time').innerText = new Date().toLocaleTimeString('en-US', {hour12: false});
+                }
+            }
+        }, 1000);
+
+        // Theme Logic
+        function setTheme(t) {
+            document.body.className = t;
+            document.querySelectorAll('.dot').forEach((d, i) => 
+                d.classList.toggle('active', (t==='' && i===0) || (t==='green' && i===1) || (t==='orange' && i===2))
+            );
+        }
+
+        // =======================
+        // Report Checker Logic
+        // =======================
+        const lnC = {}; let lG=[], lR=[], cT=null, isE=false;
+        function upLn(tId, lId) {
+            let tc=$(tId), lc=$(lId), c=1, txt=tc.value, idx=txt.indexOf('\n');
+            while(idx!==-1){ c++; idx=txt.indexOf('\n',idx+1); } let p = lnC[lId]||1; if(c===p) return;
+            if(c>p){ let f=document.createDocumentFragment(); for(let i=p+1;i<=c;i++){ let d=document.createElement('div'); d.style.height='20px'; d.textContent=i+'.'; f.appendChild(d); } lc.appendChild(f); }
+            else{ let d=p-c; while(d>0&&lc.lastChild){ lc.removeChild(lc.lastChild); d--; } } lnC[lId]=c;
+        }
+        function clr(t,l){ $(t).value=''; upLn(t,l); }
+        function toggleEdit(b,i){ let X=$(b).classList; X.toggle('hidden'); $(i).innerHTML = X.contains('hidden') ? '<svg class="ico" width="16" height="16"><use href="#i-eye"/></svg>' : '<svg class="ico" width="16" height="16"><use href="#i-eye-off"/></svg>'; }
+        const gK = l => { let p=l.trim().split(/\s+/); return p.length?p[0].toLowerCase():''; };
+        function exec() {
+            let sl = s => s.split('\n').map(l=>l.trim()).filter(l=>l);
+            let ms=new Set(sl($('mInp').value).map(gK)), rs=new Set(sl($('rInp').value).map(gK)), ts=sl($('tInp').value);
+            lG=[]; lR=[]; for(let x of ts){ let k=gK(x); if(!k) continue; if(rs.has(k)) lR.push(x); else if(ms.has(k)) lG.push(x); }
+            $('resSec').style.display='flex'; $('rc-tg').textContent=`Good (${lG.length})`; $('rc-tr').textContent=`Report (${lR.length})`; closeT(); calcSum();
+        }
+        function tab(t) {
+            if(cT===t){ closeT(); return; } cT=t; $('rc-tg').classList.remove('active'); $('rc-tr').classList.remove('active'); $('chart').classList.add('active'); let isG = t==='g';
+            $(isG?'rc-tg':'rc-tr').classList.add('active'); $('cTitle').textContent = isG?'Good List':'Report List'; let ta=$('cInp'); ta.value=(isG?lG:lR).join('\n');
+            ta.scrollTop=0; $('cLn').scrollTop=0; lnC['cLn']=0; $('cLn').innerHTML=''; upLn('cInp','cLn');
+        }
+        function closeT(){ cT=null; $('chart').classList.remove('active'); $('rc-tg').classList.remove('active'); $('rc-tr').classList.remove('active'); }
+        function copyRc() { navigator.clipboard.writeText($('cInp').value).then(()=>{ $('txtC').textContent='Copied!'; $('svgC').setAttribute('href','#i-chk'); $('svgC').style.stroke='#10b981'; setTimeout(()=>{ $('txtC').textContent='Copy'; $('svgC').setAttribute('href','#i-copy'); $('svgC').style.stroke='currentColor'; },2000); }); }
+        function calcSum() { let p=Number($('sPb').value)||0, n=$('sNb').value.trim(), g=lG.length; $('sG').textContent=g; $('sR').textContent=lR.length; $('sPt').textContent=p; $('sB').textContent=g*p; $('sNt').textContent=n?n:'.......'; }
+        
+        function togSum() { 
+            isE=!isE; 
+            ['sPt','sNt'].forEach(x=>$(x).classList.toggle('hidden-el',isE)); 
+            ['sPb','sNb'].forEach(x=>$(x).classList.toggle('hidden-el',!isE)); 
+            if(isE) $('sPb').focus(); 
+        }
+
+        function showMod(u) { $('resImg').src=u; $('imgModal').style.display='flex'; }
+
+        async function dl(act) {
+            let was=isE; if(was) togSum(); let res=null;
+            try { 
+                if(typeof htmlToImage==='undefined') { alert("Library missing."); return; }
+                if(act===2||act===3) res=await htmlToImage.toBlob($('invMap'),{quality:0.95,pixelRatio:2,backgroundColor:'#000'});
+                else res=await htmlToImage.toPng($('invMap'),{quality:1,pixelRatio:3,backgroundColor:'#000'}); 
+            } catch(e) { alert("Capture failed."); }
+            if(was) togSum();
+            if(!res) return;
+            
+            let nm=`TOOLMASTER_${$('sNb').value.trim()||'Result'}_${Date.now()}.png`;
+
+            if(act===1) { // Download 
+                let l=document.createElement('a'); l.download=nm; l.href=res; l.click();
+            }
+            if(act===2) { // Copy with Acode Fallback popup
+                try {
+                    await navigator.clipboard.write([new ClipboardItem({"image/png":res})]);
+                    $('bCi').style.color='#10b981'; setTimeout(()=>$('bCi').style.color='',2000);
+                } catch(e) { showMod(URL.createObjectURL(res)); } // If app blocks access
+            }
+            if(act===3) { // Share with Acode Fallback popup
+                try {
+                    let f=new File([res],nm,{type:'image/png'});
+                    if(navigator.canShare&&navigator.canShare({files:[f]})) await navigator.share({files:[f],title:'Report'}); else throw 1;
+                } catch(e) { showMod(URL.createObjectURL(res)); } // If app blocks share API
+            }
+        }
+
+        // =======================
+        // Email Blender Logic
+        // =======================
+        function BlendEmails() {
+            let v = $('eb-in').value.trim();
+            if (!v) return alert("Please input data!");
+            
+            let a = v.split('\n');
+            for (let i = a.length - 1; i > 0; i--) { let j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+            $('eb-out').value = a.join('\n');
+        }
+
+        function CopyBlended() {
+            let o = $('eb-out').value, b = $('cb-eb');
+            if (!o) return;
+            
+            navigator.clipboard.writeText(o);
+            b.innerText = "Copied!"; b.style.background = "#22c55e"; b.style.color = "#fff";
+            
+            setTimeout(() => { b.innerText = "Copy"; b.style.background = "var(--acc)"; b.style.color = "var(--bg)"; }, 2000);
+        }
+
+        // =======================
+        // Email Generator Logic
+        // =======================
+        function G_mail() {
+            let r='', n=Math.max(1,+$('eg-e').value||5), l=Math.max(1,+$('eg-w').value||10);
+            let a='abcdefghijklmnopqrstuvwxyz', d='0123456789', rd=m=>Math.floor(Math.random()*m);
+            for(let i=0; i<n; i++){
+                let m=''; for(let j=0; j<l; j++) m+=a[rd(26)];
+                let x=rd(4)+2; for(let j=0; j<x; j++) m+=d[rd(10)];
+                r+=`${i+1}. ${m}@gmail.com${i<n-1?'\n':''}`;
+            }
+            $('eg-o').value = r;
+            $('cb-eg').disabled = !r;
+            if(r) { $('cb-eg').style.background = 'var(--acc)'; $('cb-eg').style.color = 'var(--bg)'; }
+        }
+        function C_mail() {
+            if(!$('eg-o').value) return;
+            navigator.clipboard.writeText($('eg-o').value);
+            let b = $('cb-eg');
+            b.innerText = "Copied!"; b.style.background = "#10b981"; b.style.color = "#fff";
+            setTimeout(()=>{ b.innerText = "Copy Emails"; b.style.background = "var(--acc)"; b.style.color = "var(--bg)"; }, 2000);
+        }
+
+        // =======================
+        // Password Generator Logic
+        // =======================
+        const R = s => s[Math.floor(Math.random()*s.length)];
+        let m = 'random';
+        function S(x) {
+            m = x;
+            $('tr').className = `tab ${x=='random'?'active':''}`;
+            $('ti').className = `tab ${x=='ios'?'active':''}`;
+            $('or').className = x=='ios'?'hid':'';
+            $('oi').className = x=='random'?'hid':'';
+            $('out').innerText = "Click Generate";
+        }
+        function G() {
+            let p, L="abcdefghijklmnopqrstuvwxyz", U=L.toUpperCase(), N="0123456789", Sym="!@#$%^&*()_+~`|}{[]:;?><,./-=";
+            if(m=='random') {
+                let P = L + ($('up').checked?U:'') + ($('num').checked?N:'') + ($('sym').checked?Sym:'');
+                p = Array.from({length:$('sl').value}, ()=>R(P)).join('');
+            } else {
+                let a = [R(U), R(N), ...Array.from({length:16}, ()=>R(L))];
+                for(let i=17; i>0; i--){ let j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] }
+                p = a.join('').match(/.{1,6}/g).join('-');
+            }
+            $('out').innerText = p;
+        }
+        function C() {
+            let p = $('out').innerText, b = $('cb-pg');
+            if (p == "Click Generate") return;
+            navigator.clipboard.writeText(p);
+            b.innerText = "Copied!"; b.style.background = "#22c55e"; b.style.color = "#fff";
+            setTimeout(()=> { b.innerText = "Copy"; b.style = "" }, 2000);
+        }
+
+        // =======================
+        // 2-FA Logic
+        // =======================
+        function g2fa() {
+            let s = $('sk').value.replace(/\s/g, '');
+            if(s.length < 8) return $('res2fa').innerText = "000000";
+            try { $('res2fa').innerText = new OTPAuth.TOTP({ secret: s, digits: 6, period: 30 }).generate(); } 
+            catch { $('res2fa').innerText = "Error"; }
+        }
+        function cl() { $('sk').value = ""; $('res2fa').innerText = "000000"; $('sk').focus(); }
+        function cp2fa() {
+            let v = $('res2fa').innerText, b = $('cb-2fa');
+            if(v == "000000" || v == "Error") return;
+            navigator.clipboard.writeText(v);
+            b.innerText = "Copied!"; b.style.background = "#22c55e"; b.style.color = "#fff";
+            setTimeout(() => { b.innerText = "Copy OTP"; b.style = "" }, 2000);
+        }
+        setInterval(() => { if($('sk') && $('sk').value.replace(/\s/g, '').length >= 8) g2fa() }, 1000);
+
+    </script>
+</body>
+</html>
